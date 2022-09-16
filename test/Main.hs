@@ -1,9 +1,9 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Main (main) where
 
-import Data.Text.Tokenizer (Token(..), Repeatable(..), BlackWhiteSet, checkUniqueTokenizing)
-import qualified Data.Text.Tokenizer.BlackWhiteSet as BWS
-import Data.Text.Tokenizer.Uniqueness (MergeRes (..), Alt (..), mergeReps, ConflictTokens (..), remList)
+import Text.Tokenizer (Token(..), Repeatable(..), BlackWhiteSet, checkUniqueTokenizing)
+import qualified Text.Tokenizer.BlackWhiteSet as BWS
+import Text.Tokenizer.Uniqueness (MergeRes (..), Alt (..), mergeReps, ConflictTokens (..), remList)
 
 import Data.Void (Void)
 import qualified Data.Set as S
