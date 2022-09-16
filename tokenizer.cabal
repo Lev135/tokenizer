@@ -2,7 +2,7 @@ cabal-version:      3.0
 name:               tokenizer
 version:            0.1.0.0
 synopsis:           Check uniqueness and tokenize safely
-homepage:
+homepage:           https://github.com/Lev135/tokenizer
 license:            MIT
 license-file:       LICENSE
 author:             Lev135
@@ -65,10 +65,10 @@ library
     import:             lib
     hs-source-dirs:     src
 
-    exposed-modules:    Data.Text.Tokenizer
-                        Data.Text.Tokenizer.BlackWhiteSet
-                        Data.Text.Tokenizer.Types
-                        Data.Text.Tokenizer.Uniqueness
+    exposed-modules:    Text.Tokenizer
+                        Text.Tokenizer.BlackWhiteSet
+                        Text.Tokenizer.Types
+                        Text.Tokenizer.Uniqueness
 
 
 test-suite tokenizer-test
@@ -87,10 +87,10 @@ test-suite test-repl
     hs-source-dirs:     src, test
 
     main-is:            Main.hs
-    other-modules:      Data.Text.Tokenizer
-                        Data.Text.Tokenizer.BlackWhiteSet
-                        Data.Text.Tokenizer.Types
-                        Data.Text.Tokenizer.Uniqueness
+    other-modules:      Text.Tokenizer
+                        Text.Tokenizer.BlackWhiteSet
+                        Text.Tokenizer.Types
+                        Text.Tokenizer.Uniqueness
 
     build-depends:      megaparsec
                       , hspec

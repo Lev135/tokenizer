@@ -4,6 +4,7 @@ Tokenizer
 This package provides solution for two problems:
 - split input string on tokens of specificated sort;
 - check tokenizing of *all possible* strings is unique.
+
 The language for tokens' definitions is a subset of regular expressions
 with stars and alternatives only over symbols.
 

@@ -1,4 +1,14 @@
-module Data.Text.Tokenizer.Uniqueness (
+{- |
+  Module        : Text.Tokenizer.Uniqueness
+  Copyright     : (c) Lev Dvorkin, 2022
+  License       : MIT
+  Maintainer    : lev_135@mail.ru
+  Stability     : Experimental
+
+  This module contains implementation of uniqueness checking algorithm
+  based on Sardinas-Patterson's algorithm
+-}
+module Text.Tokenizer.Uniqueness (
     Alt (..),
     Rem (..),
     MergeRes (..), mergeReps, mergedList, remList, rem1, rem2,
@@ -13,8 +23,8 @@ import Data.Bifunctor (Bifunctor(..))
 import qualified Data.Set as S
 import Data.Coerce (coerce)
 
-import qualified Data.Text.Tokenizer.BlackWhiteSet as BWS
-import Data.Text.Tokenizer.Types
+import qualified Text.Tokenizer.BlackWhiteSet as BWS
+import Text.Tokenizer.Types
   (getBWS, RToken(..), TokId(..), Repeatable(..), castReps, Token (..), makeRToken)
 
 -- | Type synonym for list monad used as a collection of alternatives
@@ -36,8 +46,6 @@ data MergeRes r r' c = MergeRes
     mergeRem   :: Rem r r' c
   }
 
--- type Tautology :: Bool -> Bool -> Bool -> Constraint
--- type Tautology r r' r'' = (r'' ~ (r || r'), (r && r') ~ 'True => r'' ~ 'True)
 
 mergedList :: (r'' ~ (r || r'), (r && r') ~ 'True => r'' ~ 'True) =>
   MergeRes r r' c -> [Repeatable (r || r') c]
