@@ -1,14 +1,13 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Main (main) where
 
-import Text.Tokenizer (Token(..), Repeatable(..), BlackWhiteSet, checkUniqueTokenizing)
+import Text.Tokenizer
 import qualified Text.Tokenizer.BlackWhiteSet as BWS
-import Text.Tokenizer.Uniqueness (MergeRes (..), Alt (..), mergeReps, ConflictTokens (..), remList)
+import Text.Tokenizer.Uniqueness (MergeRes (..), Alt (..), mergeReps, remList)
 
 import Data.Void (Void)
 import qualified Data.Set as S
 import Data.Bifunctor (Bifunctor(..))
-import Data.Type.Bool (type (||), type (&&))
 
 import qualified Text.Megaparsec as MP
 import qualified Text.Megaparsec.Char as MP
@@ -27,10 +26,11 @@ pBWSet :: Parser (BlackWhiteSet Char)
 pBWSet = BWS.WhiteSet . S.fromList <$> group '{' '}' MP.letterChar
   <|> MP.char '!' *> (BWS.BlackSet . S.fromList <$> group '{' '}' MP.letterChar)
 
-pRepeatable :: Parser (Repeatable 'True Char)
+pRepeatable :: Parser (Repeatable Char)
 pRepeatable = do
   symb <- pBWSet
-  Some symb <$ MP.char '*' <|> pure (One symb)
+  cnt <- Some <$ MP.char '*' <|> pure One
+  pure $ Repeatable cnt symb
 
 pToken :: k -> Parser (Token k Char)
 pToken name = do
@@ -50,17 +50,17 @@ instance {-# OVERLAPS #-} Show (BlackWhiteSet Char) where
     cs -> "{" ++ cs ++ "}"
   show (BWS.BlackSet bs) = "!" ++ show (BWS.WhiteSet bs)
 
-instance {-# OVERLAPS #-} Show (Repeatable r Char) where
-  show (One bws) = show bws
-  show (Some bws) = show bws ++ "*"
+instance {-# OVERLAPS #-} Show (Repeatable Char) where
+  show (Repeatable One bws) = show bws
+  show (Repeatable Some bws) = show bws ++ "*"
 
-instance {-# OVERLAPS #-} Show [Repeatable r Char] where
+instance {-# OVERLAPS #-} Show [Repeatable Char] where
   show = concatMap show
 
 instance {-# OVERLAPS #-} Show k => Show (ConflictTokens k Char) where
   show (ConflictTokens xs ys) = unwords ["Conflicts:", show xs, show ys]
 
-toTuple :: MergeRes r r' c -> ([Repeatable (r && r') c], [Repeatable (r || r') c])
+toTuple :: MergeRes c -> ([Repeatable c], [Repeatable c])
 toTuple tmp = (merged tmp, remList tmp)
 
 testMerge :: String -> String -> Alt (String, String)

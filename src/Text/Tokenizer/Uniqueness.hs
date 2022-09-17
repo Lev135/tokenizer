@@ -18,14 +18,13 @@ module Text.Tokenizer.Uniqueness (
 
 import Control.Applicative (Alternative (..))
 import Control.Monad (guard, when)
-import Data.Type.Bool (type (||), type (&&))
 import Data.Bifunctor (Bifunctor(..))
 import qualified Data.Set as S
 import Data.Coerce (coerce)
 
 import qualified Text.Tokenizer.BlackWhiteSet as BWS
 import Text.Tokenizer.Types
-  (getBWS, RToken(..), TokId(..), Repeatable(..), castReps, Token (..), makeRToken)
+  (getBWS, RToken(..), TokId(..), Repeatable(..), Token (..), makeRToken, Count (..))
 
 -- | Type synonym for list monad used as a collection of alternatives
 newtype Alt a = Alt [a]
@@ -35,39 +34,34 @@ newtype Alt a = Alt [a]
       Foldable, Traversable
     )
 
-data Rem r r' c
+data Rem c
   -- | First list reminder. May be empty if there is no rem
-  = Rem1 [Repeatable r c]
+  = Rem1 [Repeatable c]
   -- | Second list reminder. Always is nonempty
-  | Rem2 [Repeatable r' c]
+  | Rem2 [Repeatable c]
 
-data MergeRes r r' c = MergeRes
-  { merged :: [Repeatable (r && r') c],
-    mergeRem   :: Rem r r' c
+data MergeRes c = MergeRes
+  { merged :: [Repeatable c],
+    mergeRem   :: Rem c
   }
 
-
-mergedList :: (r'' ~ (r || r'), (r && r') ~ 'True => r'' ~ 'True) =>
-  MergeRes r r' c -> [Repeatable (r || r') c]
-mergedList MergeRes{merged, mergeRem} = castReps merged <> case mergeRem of
-  Rem1 xs -> castReps xs
-  Rem2 ys -> castReps ys
-
-remList :: MergeRes r r' c -> [Repeatable (r || r') c]
+remList :: MergeRes c -> [Repeatable c]
 remList MergeRes{mergeRem} = case mergeRem of
-  Rem1 res -> castReps res
-  Rem2 res -> castReps res
+  Rem1 res -> res
+  Rem2 res -> res
 
-rem1 :: MergeRes r r' c -> [Repeatable r c]
+mergedList :: MergeRes c -> [Repeatable c]
+mergedList m@MergeRes{merged} = merged <> remList m
+
+rem1 :: MergeRes c -> [Repeatable c]
 rem1 (MergeRes _ (Rem1 xs)) = xs
 rem1 _ = []
 
-rem2 :: MergeRes r r' c -> [Repeatable r' c]
+rem2 :: MergeRes c -> [Repeatable c]
 rem2 (MergeRes _ (Rem2 ys)) = ys
 rem2 _ = []
 
-mergeReps :: (Ord c) =>
-  [Repeatable r c] -> [Repeatable r' c] -> Alt (MergeRes r r' c)
+mergeReps :: (Ord c) => [Repeatable c] -> [Repeatable c] -> Alt (MergeRes c)
 mergeReps xs ys = case (xs, ys) of
   ([], []) -> pure MergeRes {merged = [], mergeRem = Rem1 []}
   (xs, []) -> pure MergeRes {merged = [], mergeRem = Rem1 xs}
@@ -75,29 +69,29 @@ mergeReps xs ys = case (xs, ys) of
   (x : xs', y : ys') -> do
     let bws = BWS.bwsIntersection (getBWS x) (getBWS y)
     guard $ not $ BWS.isEmpty bws
-    case (x, y) of
-      (One _, One _) -> do
+    case (getCnt x, getCnt y) of
+      (One, One) -> do
         res@MergeRes{merged} <- mergeReps xs' ys'
-        pure $ res{merged = One bws : merged}
-      (One _, Some _) -> do
+        pure $ res{merged = Repeatable One bws : merged}
+      (One, Some) -> do
         res@MergeRes{merged} <- mergeReps xs' ys <|> mergeReps xs' ys'
-        pure $ res{merged = One bws : merged}
-      (Some _, One _) -> do
+        pure $ res{merged = Repeatable One bws : merged}
+      (Some, One) -> do
         res@MergeRes{merged} <- mergeReps xs ys' <|> mergeReps xs' ys'
-        pure $ res{merged = One bws : merged}
-      (Some _, Some _) -> do
+        pure $ res{merged = Repeatable One bws : merged}
+      (Some, Some) -> do
         res@MergeRes{merged} <-
           mergeReps xs' ys <|> mergeReps xs ys' <|> mergeReps xs' ys'
-        pure $ res{merged = Some bws : merged}
+        pure $ res{merged = Repeatable Some bws : merged}
 
 -- | Dangling suffix
 data Suff c = Suff
   { -- | Symbols behind suffix. Note that only @maxBehind@ symbols are preserved
-    srbeh   :: [Repeatable 'True c],
+    srbeh   :: [Repeatable c],
     -- | Symbols from suffix' body
-    scur    :: [Repeatable 'True c],
+    scur    :: [Repeatable c],
     -- | Symbols ahead suffix
-    sahead  :: [Repeatable 'False c]
+    sahead  :: [Repeatable c]
   }
   deriving (Eq, Ord, Show)
 
@@ -121,7 +115,7 @@ data Div c = Div
     -- | Tokens in alter sequence
     rprefToks :: [(TokId, Int)],
     -- | Processed symbols
-    processed :: [Repeatable 'True c],
+    processed :: [Repeatable c],
     -- | Remained suffix
     suff :: Suff c
   }
@@ -153,7 +147,7 @@ initDiv RToken{tokId, body, ahead} =
   new:             srbeh'                   scur'    sahead'
       -----------------------------------|=========|~~~~~~~~~~~~
 -}
-stepDiv :: (Ord c, Show c) => Int -> Div c -> RToken c -> Alt (Div c)
+stepDiv :: (Ord c) => Int -> Div c -> RToken c -> Alt (Div c)
 stepDiv
   maxBehind
   Div{rtoks, rprefToks, lastTok, suff = Suff{srbeh, scur, sahead}, processed}
@@ -170,7 +164,7 @@ stepDiv
       Rem1 scurRem -> do
         (scur', sahead') <- do
           tmp <- mergeReps scurRem ahead
-          let scur' = castReps (merged tmp) <> rem1 tmp
+          let scur' = merged tmp <> rem1 tmp
           sahead' <- mergedList <$> mergeReps sahead (rem2 tmp)
           pure (scur', sahead')
         pure Div {
@@ -186,7 +180,7 @@ stepDiv
       Rem2 bodyRem -> do
         (scur', sahead') <- do
           tmp <- mergeReps sahead bodyRem
-          let scur' = castReps (merged tmp) <> rem2 tmp
+          let scur' = merged tmp <> rem2 tmp
           sahead' <- mergedList <$> mergeReps (rem1 tmp) ahead
           pure (scur', sahead')
         pure Div {
@@ -198,11 +192,11 @@ stepDiv
           }
 
 data ConflictTokens k c = ConflictTokens {
-    tokList1, tokList2 :: [(k, [Repeatable 'True c])]
+    tokList1, tokList2 :: [(k, [Repeatable c])]
   } deriving (Show, Eq, Ord)
 
 -- | Check if every list composed from the set of tokens can be uniquely decomposed into tokens
-checkUniqueTokenizing :: forall k c. (Ord c, Show c) =>
+checkUniqueTokenizing :: forall k c. (Ord c) =>
   [Token k c] -> Either (ConflictTokens k c) ()
 checkUniqueTokenizing toks = mapM_ (h S.empty)
     [res | p <- allRToks,
@@ -225,7 +219,7 @@ checkUniqueTokenizing toks = mapM_ (h S.empty)
                     nextDiv@Div{suff = nextSuff} <- stepDiv maxBehind curDiv tok,
                     nextSuff `S.notMember` olds
         ]
-    hh :: [(TokId, Int)] -> [Repeatable 'True c] -> [(k, [Repeatable 'True c])]
+    hh :: [(TokId, Int)] -> [Repeatable c] -> [(k, [Repeatable c])]
     hh [] _ = []
     hh ((tokId, len) : xs') bwss = (name, bws) : hh xs' bwss'
       where

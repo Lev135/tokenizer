@@ -9,7 +9,7 @@
 -}
 module Text.Tokenizer (
     BlackWhiteSet (..), bwsSingle, bwsIntersection,
-    Repeatable (..), getBWS, castRep, castReps,
+    Count (..), Repeatable (..),
     Token (..),
 
     ConflictTokens (..), checkUniqueTokenizing
@@ -18,6 +18,6 @@ module Text.Tokenizer (
 import Text.Tokenizer.BlackWhiteSet
   (BlackWhiteSet(..), bwsSingle, bwsIntersection)
 import Text.Tokenizer.Types
-    (Token(..), Repeatable(..), getBWS, castRep, castReps)
+    (Count (..), Token(..), Repeatable(..), getBWS)
 import Text.Tokenizer.Uniqueness
   (ConflictTokens (..), checkUniqueTokenizing)

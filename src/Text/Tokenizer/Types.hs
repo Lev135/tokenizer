@@ -9,7 +9,7 @@
   tokenizing algorithms
 -}
 module Text.Tokenizer.Types (
-    Repeatable (..), getBWS, castRep, castReps,
+    Count (..), Repeatable (..),
     TokId (..), Token (..), RToken (..), makeRToken
   ) where
 
@@ -17,41 +17,18 @@ import Data.Function (on)
 
 import Text.Tokenizer.BlackWhiteSet (BlackWhiteSet)
 
+data Count = One | Some
+  deriving (Eq, Ord, Show)
+
 -- | 'BlackWhiteSet' that is/isn't able to be repeated.
 --
 -- @Repeatable 'False c@ is isomorphic to @c@ (symbol's set can not be repeated).
 -- @Repeatable 'True c@ can be repeated
 -- (both 'One' and 'Some' constructors can be used).
-data Repeatable (r :: Bool) c where
-  -- | construct 'Repeatable' matching exactly one character from 'BlackWhiteSet'
-  One :: BlackWhiteSet c -> Repeatable r c
-  -- | construct 'Repeatable' matching one or more characters from 'BlackWhiteSet'
-  Some :: BlackWhiteSet c -> Repeatable 'True c
-
--- | Returns 'BlackWhiteSet' matchable (one or some times) by 'Repeatable'
-getBWS :: Repeatable r c -> BlackWhiteSet c
-getBWS = \case
-  One bws -> bws
-  Some bws -> bws
-
--- | Reduce restrictions for 'Repeatable' (i. e. it's possible to make it
--- really repeatable (@r' ~ 'True@), even if it's not at the moment)
-castRep :: forall r' r c. (r ~ 'True => r' ~ 'True) =>
-  Repeatable r c -> Repeatable r' c
-castRep = \case
-  One x -> One x
-  Some x -> Some x
-
--- | Apply 'castRep' for all repeatables in list:
---
--- prop> castReps == map castRep
-castReps :: forall r' r c. (r ~ 'True => r' ~ 'True) =>
-  [Repeatable r c] -> [Repeatable r' c]
-castReps = map castRep
-
-deriving instance Eq c => Eq (Repeatable r c)
-deriving instance Ord c => Ord (Repeatable r c)
-deriving instance Show c => Show (Repeatable r c)
+data Repeatable c = Repeatable {
+    getCnt :: Count,
+    getBWS :: BlackWhiteSet c
+  } deriving (Eq, Ord, Show)
 
 -- data TokExp c
 --   = ERep (Repeatable 'True c)
@@ -69,7 +46,7 @@ data Token k c = Token
     -- matched part respectively
     behind, ahead :: [BlackWhiteSet c],
     -- | matchable sequences of char sets with possible repetitions
-    body :: [Repeatable 'True c]
+    body :: [Repeatable c]
   }
 
 -- | Wrapped token id. Should be generated automatically
@@ -82,9 +59,9 @@ data RToken c = RToken
   { -- | unique token's id (generated automatically)
     tokId :: TokId,
     -- | constraints on symbols behind/ahead of matchable part
-    rbehind, ahead :: [Repeatable 'False c],
+    rbehind, ahead :: [Repeatable c],
     -- | matchable part of string
-    body :: [Repeatable 'True c]
+    body :: [Repeatable c]
   }
   deriving (Show)
 
@@ -101,6 +78,6 @@ makeRToken tokId Token{body, behind, ahead} =
   RToken {
     tokId,
     body,
-    rbehind = One <$> reverse behind,
-    ahead = One <$> ahead
+    rbehind = Repeatable One <$> reverse behind,
+    ahead = Repeatable One <$> ahead
   }
