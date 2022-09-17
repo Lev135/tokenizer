@@ -20,20 +20,11 @@ import Text.Tokenizer.BlackWhiteSet (BlackWhiteSet)
 data Count = One | Some
   deriving (Eq, Ord, Show)
 
--- | 'BlackWhiteSet' that is/isn't able to be repeated.
---
--- @Repeatable 'False c@ is isomorphic to @c@ (symbol's set can not be repeated).
--- @Repeatable 'True c@ can be repeated
--- (both 'One' and 'Some' constructors can be used).
+-- | 'BlackWhiteSet' that can be repeated.
 data Repeatable c = Repeatable {
     getCnt :: Count,
     getBWS :: BlackWhiteSet c
   } deriving (Eq, Ord, Show)
-
--- data TokExp c
---   = ERep (Repeatable 'True c)
---   | ESeq (TokExp c) (TokExp c)
---   | EOr  (TokExp c) (TokExp c)
 
 -- | Token with name of type @k@ (used for uniqueness error messages and
 -- tokenizing output) over char type @c@.
