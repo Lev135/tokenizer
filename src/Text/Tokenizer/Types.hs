@@ -48,6 +48,7 @@ data Token k c = Token
     -- | matchable sequences of char sets with possible repetitions
     body :: [Repeatable c]
   }
+  deriving (Show)
 
 -- | Token id type synonym.
 type TokId = Int

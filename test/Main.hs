@@ -37,7 +37,7 @@ pRepeatable = do
 pToken :: k -> Parser (Token k Char)
 pToken name = do
   behind <- MP.option [] (MP.char '?' *> group '<' '>' pBWSet)
-  body <- many pRepeatable
+  body <- some pRepeatable
   ahead <- MP.option [] (MP.char '?' *> group '<' '>' pBWSet)
   pure Token {..}
 
@@ -143,6 +143,8 @@ main = hspec $ do
       [("a", "a")] [("{ab}", "a")]
     itTestFail ["?<a>a", "b", "ab"]
       [("?<a>a", "a"), ("b", "b")] [("ab", "ab")]
+    itTestFail ["a*"]
+      [("a*", "a"), ("a*", "a*")] [("a*", "a*")]
   describe "tokenizing" $ do
     let a = ("a", "a")
         b = ("b", "b")
@@ -158,4 +160,3 @@ main = hspec $ do
     itTokNoWay ["a?b"] "ab" 1 [("a?b", "a")]
 
     itTokTwoWays ["a*"] "aa" 0 [("a*", "a"), ("a*", "a")] [("a*", "aa")]
-

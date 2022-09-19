@@ -189,7 +189,8 @@ data ConflictTokens k c = ConflictTokens {
 -- | Check if every list composed from the set of tokens can be uniquely decomposed into tokens
 checkUniqueTokenizing :: forall k c. (Ord c) =>
   [Token k c] -> Either (ConflictTokens k c) ()
-checkUniqueTokenizing toks = mapM_ (h S.empty)
+checkUniqueTokenizing toks = do
+  mapM_ (h S.empty)
     [res | p <- allRToks,
            p' <- allRToks,
            p /= p',

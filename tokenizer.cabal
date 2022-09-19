@@ -112,6 +112,7 @@ executable examples
     main-is:            Main.hs
     other-modules:
     build-depends:      tokenizer
+                      , megaparsec
 
     if flag(examples)
         buildable:      True
