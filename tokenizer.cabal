@@ -104,3 +104,20 @@ test-suite test-repl
                         Text.Tokenizer.Types
                         Text.Tokenizer.Uniqueness
                         Text.Tokenizer.Split
+
+executable examples
+    import:             basics
+    hs-source-dirs:     examples
+
+    main-is:            Main.hs
+    other-modules:
+    build-depends:      tokenizer
+
+    if flag(examples)
+        buildable:      True
+    else
+        buildable:      False
+
+flag examples
+    default:            False
+    description:        Build examples executable
