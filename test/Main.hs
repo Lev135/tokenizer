@@ -144,7 +144,7 @@ main = hspec $ do
     itTestFail ["?<a>a", "b", "ab"]
       [("?<a>a", "a"), ("b", "b")] [("ab", "ab")]
     itTestFail ["a*"]
-      [("a*", "a"), ("a*", "a*")] [("a*", "a*")]
+      [("a*", "a*a*"), ("a*", "a*")] [("a*", "a*"), ("a*", "a*a*")]
   describe "tokenizing" $ do
     let a = ("a", "a")
         b = ("b", "b")

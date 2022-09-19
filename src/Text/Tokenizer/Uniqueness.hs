@@ -16,7 +16,7 @@ module Text.Tokenizer.Uniqueness (
   ) where
 
 import Control.Applicative (Alternative (..))
-import Control.Monad (guard, when)
+import Control.Monad (guard)
 import Data.Bifunctor (Bifunctor(..))
 import qualified Data.Set as S
 import Data.Coerce (coerce)
@@ -193,7 +193,6 @@ checkUniqueTokenizing toks = do
   mapM_ (h S.empty)
     [res | p <- allRToks,
            p' <- allRToks,
-           p /= p',
            res <- stepDiv maxBehind (initDiv p') p
     ]
   where
@@ -201,16 +200,20 @@ checkUniqueTokenizing toks = do
     maxBehind = maximum $ (\Token {behind} -> length behind) <$> toks
     h :: S.Set (Suff c) -> Div c -> Either (ConflictTokens k c) ()
     h olds curDiv@Div{rprefToks, processed, lastTok, rtoks, suff = suff@Suff{scur}} = do
-      when (null scur) $
-        Left ConflictTokens {
-          tokList1 = hh (reverse rprefToks) processed,
-          tokList2 = hh (reverse (lastTok : rtoks)) processed
-        }
-      mapM_ (h $ S.insert suff olds)
-        [ nextDiv | tok <- allRToks,
-                    nextDiv@Div{suff = nextSuff} <- stepDiv maxBehind curDiv tok,
-                    nextSuff `S.notMember` olds
-        ]
+      if null scur
+      then
+        case (rtoks, rprefToks) of
+          ([], [tok]) | fst tok == fst lastTok -> pure ()
+          _ -> Left ConflictTokens {
+                  tokList1 = hh (reverse rprefToks) processed,
+                  tokList2 = hh (reverse (lastTok : rtoks)) processed
+                }
+      else
+        mapM_ (h $ S.insert suff olds)
+          [ nextDiv | tok <- allRToks,
+                      nextDiv@Div{suff = nextSuff} <- stepDiv maxBehind curDiv tok,
+                      nextSuff `S.notMember` olds
+          ]
     hh :: [(TokId, Int)] -> [Repeatable c] -> [(k, [Repeatable c])]
     hh [] _ = []
     hh ((tokId, len) : xs') bwss = (name, bws) : hh xs' bwss'
