@@ -9,7 +9,6 @@
   based on Sardinas-Patterson's algorithm
 -}
 module Text.Tokenizer.Uniqueness (
-    Alt (..),
     Rem (..),
     MergeRes (..), mergeReps, mergedList, remList, rem1, rem2,
     Suff (..), Div (..), initDiv, stepDiv,
@@ -24,15 +23,7 @@ import Data.Coerce (coerce)
 
 import qualified Text.Tokenizer.BlackWhiteSet as BWS
 import Text.Tokenizer.Types
-  (getBWS, RToken(..), TokId(..), Repeatable(..), Token (..), makeRToken, Count (..))
-
--- | Type synonym for list monad used as a collection of alternatives
-newtype Alt a = Alt [a]
-  deriving (
-      Eq, Ord, Show,
-      Functor, Applicative, Monad, Alternative,
-      Foldable, Traversable
-    )
+  (Alt (..), getBWS, RToken(..), TokId, Repeatable(..), Token (..), makeRToken, Count (..))
 
 data Rem c
   -- | First list reminder. May be empty if there is no rem

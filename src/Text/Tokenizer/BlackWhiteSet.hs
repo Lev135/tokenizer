@@ -10,7 +10,7 @@
 -}
 module Text.Tokenizer.BlackWhiteSet (
     BlackWhiteSet (..),
-    singleton, intersection, isEmpty
+    singleton, intersection, isEmpty, member
   ) where
 
 import Data.Set (Set)
@@ -39,3 +39,7 @@ intersection (WhiteSet w) (WhiteSet w') = WhiteSet (S.intersection w w')
 isEmpty :: BlackWhiteSet c -> Bool
 isEmpty (WhiteSet w) = null w
 isEmpty _ = False
+
+member :: Ord c => c -> BlackWhiteSet c -> Bool
+member c (BlackSet s) = S.notMember c s
+member c (WhiteSet s) = S.member c s

@@ -3,7 +3,7 @@ module Main (main) where
 
 import Text.Tokenizer
 import qualified Text.Tokenizer.BlackWhiteSet as BWS
-import Text.Tokenizer.Uniqueness (MergeRes (..), Alt (..), mergeReps, remList)
+import Text.Tokenizer.Uniqueness (MergeRes (..), mergeReps, remList)
 
 import Data.Void (Void)
 import qualified Data.Set as S
@@ -13,6 +13,8 @@ import qualified Text.Megaparsec as MP
 import qualified Text.Megaparsec.Char as MP
 import Control.Applicative (Alternative(..))
 import Test.Hspec (hspec, describe, it, shouldBe, HasCallStack, Spec)
+import Text.Tokenizer.Types (Alt (..))
+import Text.Tokenizer.Split (TokenizeError (NoWayTokenize, TwoWaysTokenize))
 
 type Parser = MP.Parsec Void String
 
@@ -67,10 +69,13 @@ testMerge :: String -> String -> Alt (String, String)
 testMerge xsStr ysStr = bimap show show . toTuple <$>
   mergeReps (parse (many pRepeatable) xsStr) (parse (many pRepeatable) ysStr)
 
+showStr :: String -> String
+showStr s = if null s then "<empty>" else s
+
 itTestMerge :: HasCallStack => String -> String -> [] (String, String) -> Spec
-itTestMerge xsStr ysStr res = it (unwords [h xsStr, "vs", h ysStr]) $
-  testMerge xsStr ysStr `shouldBe` Alt res
-  where h s = if null s then "<empty>" else s
+itTestMerge xsStr ysStr res =
+  it (unwords [showStr xsStr, "vs", showStr ysStr]) $
+    testMerge xsStr ysStr `shouldBe` Alt res
 
 itTestUnique :: HasCallStack => [String] -> Spec
 itTestUnique tokStrs = it (show tokStrs) $
@@ -83,6 +88,26 @@ itTestFail tokStrs toks1 toks2 = it (show tokStrs) $
         tokList1 = second (parse (many pRepeatable)) <$> toks1,
         tokList2 = second (parse (many pRepeatable)) <$> toks2
       }
+
+itTestTokenize :: HasCallStack => [String] -> String ->
+  Either (TokenizeError [Char] Char) [(String, String)] -> Spec
+itTestTokenize tokStrs str res =
+  it (show tokStrs <> " vs " <> showStr str) $
+    tokenize tokMap str `shouldBe` res
+  where
+    tokMap = makeTokenizeMap $ (\s -> parse (pToken s) s) <$> tokStrs
+
+itTokOk :: HasCallStack => [String] -> String -> [(String, String)] -> Spec
+itTokOk tokStrs str res =
+  itTestTokenize tokStrs str (Right res)
+
+itTokNoWay :: [String] -> String -> Int -> [([Char], [Char])] -> Spec
+itTokNoWay tokStrs str pos toked =
+  itTestTokenize tokStrs str (Left $ NoWayTokenize pos toked)
+
+itTokTwoWays :: [String] -> String -> Int -> [(String, String)] -> [(String, String)]-> Spec
+itTokTwoWays tokStrs str pos toked1 toked2 =
+  itTestTokenize tokStrs str (Left $ TwoWaysTokenize pos toked1 toked2)
 
 main :: IO ()
 main = hspec $ do
@@ -118,3 +143,19 @@ main = hspec $ do
       [("a", "a")] [("{ab}", "a")]
     itTestFail ["?<a>a", "b", "ab"]
       [("?<a>a", "a"), ("b", "b")] [("ab", "ab")]
+  describe "tokenizing" $ do
+    let a = ("a", "a")
+        b = ("b", "b")
+    itTokOk [] "" []
+    itTokOk ["a"] "" []
+    itTokOk ["a"] "a" [a]
+    itTokOk ["a", "b"] "ab" [a, b]
+    itTokOk ["a"] "aa" [a, a]
+    itTokOk ["a?a"] "aa" [("a?a", "a"), ("a?a", "a")]
+    itTokOk ["a*?!a"] "aaa" [("a*?!a", "aaa")]
+
+    itTokNoWay ["a?!a"] "aa" 0 []
+    itTokNoWay ["a?b"] "ab" 1 [("a?b", "a")]
+
+    itTokTwoWays ["a*"] "aa" 0 [("a*", "a"), ("a*", "a")] [("a*", "aa")]
+

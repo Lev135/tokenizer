@@ -69,6 +69,7 @@ library
                         Text.Tokenizer.BlackWhiteSet
                         Text.Tokenizer.Types
                         Text.Tokenizer.Uniqueness
+                        Text.Tokenizer.Split
 
 
 test-suite tokenizer-test
@@ -91,6 +92,7 @@ test-suite test-repl
                         Text.Tokenizer.BlackWhiteSet
                         Text.Tokenizer.Types
                         Text.Tokenizer.Uniqueness
+                        Text.Tokenizer.Split
 
     build-depends:      megaparsec
                       , hspec

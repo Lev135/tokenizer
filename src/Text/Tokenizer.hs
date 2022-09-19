@@ -12,9 +12,11 @@ module Text.Tokenizer (
     Count (..), Repeatable (..),
     Token (..),
 
-    ConflictTokens (..), checkUniqueTokenizing
+    ConflictTokens (..), checkUniqueTokenizing,
+    TokenizeMap (..), makeTokenizeMap, tokenize
   ) where
 
 import Text.Tokenizer.BlackWhiteSet (BlackWhiteSet(..))
 import Text.Tokenizer.Types (Count (..), Token(..), Repeatable(..), getBWS)
 import Text.Tokenizer.Uniqueness (ConflictTokens (..), checkUniqueTokenizing)
+import Text.Tokenizer.Split (TokenizeMap (..), makeTokenizeMap, tokenize)
