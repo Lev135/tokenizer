@@ -8,16 +8,13 @@
   This module reexports everything you need from the package
 -}
 module Text.Tokenizer (
-    BlackWhiteSet (..), bwsSingle, bwsIntersection,
+    BlackWhiteSet (..),
     Count (..), Repeatable (..),
     Token (..),
 
     ConflictTokens (..), checkUniqueTokenizing
   ) where
 
-import Text.Tokenizer.BlackWhiteSet
-  (BlackWhiteSet(..), bwsSingle, bwsIntersection)
-import Text.Tokenizer.Types
-    (Count (..), Token(..), Repeatable(..), getBWS)
-import Text.Tokenizer.Uniqueness
-  (ConflictTokens (..), checkUniqueTokenizing)
+import Text.Tokenizer.BlackWhiteSet (BlackWhiteSet(..))
+import Text.Tokenizer.Types (Count (..), Token(..), Repeatable(..), getBWS)
+import Text.Tokenizer.Uniqueness (ConflictTokens (..), checkUniqueTokenizing)

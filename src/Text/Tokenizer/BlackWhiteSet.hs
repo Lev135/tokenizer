@@ -10,7 +10,7 @@
 -}
 module Text.Tokenizer.BlackWhiteSet (
     BlackWhiteSet (..),
-    bwsSingle, bwsIntersection, isEmpty
+    singleton, intersection, isEmpty
   ) where
 
 import Data.Set (Set)
@@ -22,15 +22,15 @@ data BlackWhiteSet c = BlackSet (Set c) | WhiteSet (Set c)
   deriving (Eq, Ord, Show)
 
 -- | Make a 'BlackWhiteSet' containing only one symbol
-bwsSingle :: c -> BlackWhiteSet c
-bwsSingle = WhiteSet . S.singleton
+singleton :: c -> BlackWhiteSet c
+singleton = WhiteSet . S.singleton
 
 -- | Intersect two 'BlackWhiteSet's.
-bwsIntersection :: Ord c => BlackWhiteSet c -> BlackWhiteSet c -> BlackWhiteSet c
-bwsIntersection (BlackSet b) (BlackSet b') = BlackSet (S.union b b')
-bwsIntersection (BlackSet b) (WhiteSet w) = WhiteSet (S.difference w b)
-bwsIntersection (WhiteSet w) (BlackSet b) = WhiteSet (S.difference w b)
-bwsIntersection (WhiteSet w) (WhiteSet w') = WhiteSet (S.intersection w w')
+intersection :: Ord c => BlackWhiteSet c -> BlackWhiteSet c -> BlackWhiteSet c
+intersection (BlackSet b) (BlackSet b') = BlackSet (S.union b b')
+intersection (BlackSet b) (WhiteSet w) = WhiteSet (S.difference w b)
+intersection (WhiteSet w) (BlackSet b) = WhiteSet (S.difference w b)
+intersection (WhiteSet w) (WhiteSet w') = WhiteSet (S.intersection w w')
 
 -- | Check if 'BlackWhiteSet' is empty
 --

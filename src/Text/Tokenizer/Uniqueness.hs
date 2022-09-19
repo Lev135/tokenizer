@@ -67,7 +67,7 @@ mergeReps xs ys = case (xs, ys) of
   (xs, []) -> pure MergeRes {merged = [], mergeRem = Rem1 xs}
   ([], ys) -> pure MergeRes {merged = [], mergeRem = Rem2 ys}
   (x : xs', y : ys') -> do
-    let bws = BWS.bwsIntersection (getBWS x) (getBWS y)
+    let bws = BWS.intersection (getBWS x) (getBWS y)
     guard $ not $ BWS.isEmpty bws
     case (getCnt x, getCnt y) of
       (One, One) -> do
