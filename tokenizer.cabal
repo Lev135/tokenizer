@@ -7,6 +7,8 @@ description:
     Provide fast enough uniqueness checking for set of tokens specified on a
     subset of regular expression. See README for more info.
 
+    /WARNING this package is not tested enough for the moment. Bugs are very likely here./
+
 license:            MIT
 license-file:       LICENSE
 author:             Lev135

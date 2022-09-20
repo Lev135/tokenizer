@@ -106,16 +106,31 @@ Uniqueness checking is provided by a modification of Sardinas-Patterson's
 algorithm. Tokenizing process is written in the most simple way with
 non-exponential asymptotic of the input string's length.
 
+Usage
+---
+It's very likely, that all you need is exported from `Data.Text.Tokenizer`.
+
+Bug reports and feature requests
+---
+Feel free open issues at
+[the GitHub repo](https://github.com/Lev135/tokenizer/issues)
+
 Contribution
 ---
 I would be vary glad for any contribution. The are many ways to improve this lib:
-- improve documentation and examples
-- add more tests to check, that everything works nice
-- improve code readability (I've tried not to make it absolutely terrible, but
-  it's definitely not perfect)
+- improve documentation and examples;
+- add more tests to check, that everything works nice;
 - improve performance (I think there are many opportunities here in both
-  algorithms)
-- add benchmarks (connected with the previous)
+  algorithms);
+- add benchmarks (connected with the previous).
+- *(this issue is mostly for me :)*
+  improve code readability (I've tried not to make it absolutely terrible, but
+  it's definitely not perfect);
 
 I know, that some of those problems (especially code readability) should be
 closed by myself, but unfortunately I have no time to deal with them now.
+
+Maybe, I'm the package is too raw to publish it, but there are some reasons for
+me to do so:
+- I don't no when it will be improved enough;
+- it is needed for my main project ([FineTeX](https://github.com/lev135/FineTeX)).

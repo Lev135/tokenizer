@@ -1,5 +1,5 @@
 # Revision history for tokenizer
 
-## 0.1.0.0 -- YYYY-mm-dd
+## 0.1.0.0 -- 2022-09-20
 
-* First version. Released on an unsuspecting world.
+* First raw version is released.
