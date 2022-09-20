@@ -1,27 +1,42 @@
-module Text.Tokenizer.Split where
+{- |
+  Module        : Text.Tokenizer.Split
+  Copyright     : (c) Lev Dvorkin, 2022
+  License       : MIT
+  Maintainer    : lev_135@mail.ru
+  Stability     : Experimental
+
+  This provides simple tokenizing algorithm
+-}
+module Text.Tokenizer.Split (
+    TokenizeMap (..), singleTokMap, insert, makeTokenizeMap,
+    TokenizeError (..), tokenize
+  ) where
 
 import Data.Map (Map)
 
-import Text.Tokenizer.Types
 import qualified Data.Map as M
 import Data.IntMap (IntMap)
 import qualified Data.IntMap as IM
 import qualified Data.Set as S
-import Text.Tokenizer.BlackWhiteSet (BlackWhiteSet(..))
 import Data.Bifunctor (Bifunctor(..))
-import Control.Monad.State (State, evalState, gets)
+import Control.Monad.Trans.State (State, evalState, gets)
 import Data.Maybe (fromMaybe)
 import Data.Foldable (foldrM)
 import Control.Monad (guard)
 import Data.Coerce (coerce)
 import qualified Text.Tokenizer.BlackWhiteSet as BWS
 import Control.Applicative (Alternative(..))
-import qualified Data.IntMap as Im
 
+import Text.Tokenizer.Types
+  (Token(..), Count(..), Repeatable(..), RToken(..), TokId, Alt(..), makeRToken)
+import Text.Tokenizer.BlackWhiteSet (BlackWhiteSet(..))
+
+-- | Simple lens for modifying 'tokId' field
 modifyId :: (TokId -> TokId) -> RToken c -> RToken c
 modifyId f tok@RToken {tokId} = tok {tokId = f tokId}
 
-
+-- | Auxillary structure for tokenizing. Should be used as opaque type,
+-- initializing by 'makeTokenizeMap' and concatenating by 'Semigroup' instance.
 data TokenizeMap k c = TokenizeMap {
     tokCount    :: Int,
     charTokMap  :: Map c [RToken c],
@@ -46,6 +61,7 @@ instance Ord c => Semigroup (TokenizeMap k c) where
 instance Ord c => Monoid (TokenizeMap k c) where
   mempty = TokenizeMap 0 mempty mempty mempty
 
+-- | Make a 'TokenizeMap' with one element
 singleTokMap :: Ord c => Token k c -> TokenizeMap k c
 singleTokMap tok@Token {name, body} =
   TokenizeMap
@@ -100,7 +116,7 @@ tokenize TokenizeMap {charTokMap, blackToks, tokNames} cs =
     bimap nameTokErr nameTokRes $ flip evalState mempty $ h 0 [] cs
   where
     nameTokErr :: TokenizeError TokId c -> TokenizeError k c
-    nameTokErr = mapTokErrKey (tokNames Im.!)
+    nameTokErr = mapTokErrKey (tokNames IM.!)
     nameTokRes :: [(TokId, [c])] -> [(k, [c])]
     nameTokRes = map $ first (tokNames IM.!)
     -- input string is split in two parts: (reversed) @prevs@ and @nexts@
@@ -169,8 +185,4 @@ check rs0@(Repeatable cnt bws : rs) (c : cs) = do
     Some -> check rs cs <|> check rs0 cs
 
 type Res c = Either (TokenizeError TokId c) [(TokId, [c])]
-
-infixr 9 .:
-(.:) :: (b -> c) -> (a -> a' -> b) -> a -> a' -> c
-(.:) = fmap . fmap
 

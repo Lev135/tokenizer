@@ -182,6 +182,7 @@ stepDiv
             processed = proc'
           }
 
+-- | Two ways of tokenizing a string, demonstrating non-uniqueness
 data ConflictTokens k c = ConflictTokens {
     tokList1, tokList2 :: [(k, [Repeatable c])]
   } deriving (Show, Eq, Ord)

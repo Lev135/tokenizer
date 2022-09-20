@@ -40,6 +40,13 @@ isEmpty :: BlackWhiteSet c -> Bool
 isEmpty (WhiteSet w) = null w
 isEmpty _ = False
 
+-- | Check if symbol is a member of a 'BlackWhiteSet'
+--
+-- >>> member 'a' (WhiteSet (S.fromList ['a', 'b']))
+-- True
+--
+-- >>> member 'a' (BlackSet (S.fromList ['a', 'b']))
+-- False
 member :: Ord c => c -> BlackWhiteSet c -> Bool
 member c (BlackSet s) = S.notMember c s
 member c (WhiteSet s) = S.member c s

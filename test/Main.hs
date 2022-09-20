@@ -14,7 +14,6 @@ import qualified Text.Megaparsec.Char as MP
 import Control.Applicative (Alternative(..))
 import Test.Hspec (hspec, describe, it, shouldBe, HasCallStack, Spec)
 import Text.Tokenizer.Types (Alt (..))
-import Text.Tokenizer.Split (TokenizeError (NoWayTokenize, TwoWaysTokenize))
 
 type Parser = MP.Parsec Void String
 

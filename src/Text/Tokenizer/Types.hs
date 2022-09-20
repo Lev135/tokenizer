@@ -26,6 +26,7 @@ newtype Alt a = Alt [a]
       Foldable, Traversable
     )
 
+-- | Number of symbols acceptable by 'Repeatable'
 data Count = One | Some
   deriving (Eq, Ord, Show)
 
