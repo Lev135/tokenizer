@@ -22,6 +22,9 @@ instance {-# OVERLAPS #-} Show (Repeatable Char) where
   show (Repeatable One bws) = show bws
   show (Repeatable Some bws) = show bws ++ "*"
 
+instance {-# OVERLAPS #-} Show [BlackWhiteSet Char] where
+  show = concatMap show
+
 instance {-# OVERLAPS #-} Show [Repeatable Char] where
   show = concatMap show
 

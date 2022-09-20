@@ -40,7 +40,7 @@ pToken name = do
   ahead <- MP.option [] (MP.char '?' *> group '<' '>' pBWSet)
   pure Token {..}
 
-parse :: Parser a -> String -> a
+parse :: HasCallStack => Parser a -> String -> a
 parse p str = case MP.parse (p <* MP.eof) "" str of
   Left peb -> error (MP.errorBundlePretty peb)
   Right res -> res
@@ -84,8 +84,8 @@ itTestFail :: HasCallStack => [String] -> [(String, String)] -> [(String, String
 itTestFail tokStrs toks1 toks2 = it (show tokStrs) $
   checkUniqueTokenizing ((\s -> parse (pToken s) s) <$> tokStrs)
     `shouldBe` Left ConflictTokens {
-        tokList1 = second (parse (many pRepeatable)) <$> toks1,
-        tokList2 = second (parse (many pRepeatable)) <$> toks2
+        tokList1 = second (parse (many pBWSet)) <$> toks1,
+        tokList2 = second (parse (many pBWSet)) <$> toks2
       }
 
 itTestTokenize :: HasCallStack => [String] -> String ->
@@ -143,7 +143,7 @@ main = hspec $ do
     itTestFail ["?<a>a", "b", "ab"]
       [("?<a>a", "a"), ("b", "b")] [("ab", "ab")]
     itTestFail ["a*"]
-      [("a*", "a*a*"), ("a*", "a*")] [("a*", "a*"), ("a*", "a*a*")]
+      [("a*", "aa"), ("a*", "a")] [("a*", "a"), ("a*", "aa")]
   describe "tokenizing" $ do
     let a = ("a", "a")
         b = ("b", "b")

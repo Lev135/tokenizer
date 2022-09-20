@@ -89,6 +89,9 @@ makeTokenizeMap :: Ord c => [Token k c] -> TokenizeMap k c
 makeTokenizeMap = foldr insert mempty
 
 -- | Error during tokenizing
+--
+-- Everywhere @[(k, [c])]@ type is used, the list of pairs with name of token
+-- and part of string, matched by it is stored
 data TokenizeError k c
   = NoWayTokenize
       Int

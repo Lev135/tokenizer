@@ -184,7 +184,7 @@ stepDiv
 
 -- | Two ways of tokenizing a string, demonstrating non-uniqueness
 data ConflictTokens k c = ConflictTokens {
-    tokList1, tokList2 :: [(k, [Repeatable c])]
+    tokList1, tokList2 :: [(k, [BWS.BlackWhiteSet c])]
   } deriving (Show, Eq, Ord)
 
 -- | Check if every list composed from the set of tokens can be uniquely decomposed into tokens
@@ -206,8 +206,8 @@ checkUniqueTokenizing toks = do
         case (rtoks, rprefToks) of
           ([], [tok]) | fst tok == fst lastTok -> pure ()
           _ -> Left ConflictTokens {
-                  tokList1 = hh (reverse rprefToks) processed,
-                  tokList2 = hh (reverse (lastTok : rtoks)) processed
+                  tokList1 = hh (reverse rprefToks) $ getBWS <$> processed,
+                  tokList2 = hh (reverse (lastTok : rtoks)) $ getBWS <$> processed
                 }
       else
         mapM_ (h $ S.insert suff olds)
@@ -215,7 +215,7 @@ checkUniqueTokenizing toks = do
                       nextDiv@Div{suff = nextSuff} <- stepDiv maxBehind curDiv tok,
                       nextSuff `S.notMember` olds
           ]
-    hh :: [(TokId, Int)] -> [Repeatable c] -> [(k, [Repeatable c])]
+    hh :: [(TokId, Int)] -> [BWS.BlackWhiteSet c] -> [(k, [BWS.BlackWhiteSet c])]
     hh [] _ = []
     hh ((tokId, len) : xs') bwss = (name, bws) : hh xs' bwss'
       where

@@ -58,7 +58,7 @@ algorithm gives another conflict `"aaa*b"` can be spit as `aa` and `a*b` or
 simply `a*b`:
 ``` hs
 > checkUniqueTokenizing $  parse <$> ["a*b", "aa", "b"]
-Left Conflicts: [("aa",aa),("a*b",a*b)] [("a*b",aaa*b)]
+Left Conflicts: [("aa",aa),("a*b",ab)] [("a*b",aaab)]
 ```
 
 Try it yourself by executing `cabal repl examples -f examples`
