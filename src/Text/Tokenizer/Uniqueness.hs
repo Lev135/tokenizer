@@ -187,7 +187,8 @@ data ConflictTokens k c = ConflictTokens {
     tokList1, tokList2 :: [(k, [BWS.BlackWhiteSet c])]
   } deriving (Show, Eq, Ord)
 
--- | Check if every list composed from the set of tokens can be uniquely decomposed into tokens
+-- | Check that there is no list of symbols, that can be decomposed to ways
+-- on the tokens from given list
 checkUniqueTokenizing :: forall k c. (Ord c) =>
   [Token k c] -> Either (ConflictTokens k c) ()
 checkUniqueTokenizing toks = do

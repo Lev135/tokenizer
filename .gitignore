@@ -2,3 +2,6 @@ dist-newstyle
 dist
 .vscode
 cabal.project.local
+dist-haddock
+cabal-commands
+packagedb

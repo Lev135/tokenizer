@@ -12,44 +12,51 @@ Some examples
 *If you have problems with understanding the syntax we use read two
 sections bellow.*
 
+- *parse* make `Token` from a string
+- *checkUniqueTokenizing* check if every string can no more than one way to be
+  split into parts in such a way, that each of them would be matched
+  by one of the given tokens
+- *tokenize* tries to split given string on parts with the same
+  condition.
+
 Here everything is ok
 ```hs
-> checkUniqueTokenizing $  parse <$> ["ab", "bc", "abc"]
+> checkUniqueTokenizing $ parse <$> ["ab", "bc", "abc"]
 Right ()
 ```
 and we can split string on these token with deterministic result:
 ```hs
-> tokenize (makeTokenizeMap $  parse <$> ["ab", "bc", "abc"]) "abbcabc"
+> tokenize (makeTokenizeMap $ parse <$> ["ab", "bc", "abc"]) "abbcabc"
 Right [("ab","ab"),("bc","bc"),("abc","abc")]
-> tokenize (makeTokenizeMap $  parse <$> ["ab", "bc", "abc"]) "abbcabca"
+> tokenize (makeTokenizeMap $ parse <$> ["ab", "bc", "abc"]) "abbcabca"
 Left (NoWayTokenize 7 [("ab","ab"),("bc","bc"),("abc","abc")])
 ```
 
 We can parse `"ab"` as `"a"` and `"b"` or `"ab"`
 ```hs
-> checkUniqueTokenizing $  parse <$> ["ab", "a", "b"]
+> checkUniqueTokenizing $ parse <$> ["ab", "a", "b"]
 Left Conflicts: [("a",a),("b",b)] [("ab",ab)]
 ```
 we *can* tokenize using this set of tokens, but sometimes it gives us
 `TwoWaysTokenize` error:
 ```hs
-> tokenize (makeTokenizeMap $  parse <$> ["a", "b", "ab"]) "bba"
+> tokenize (makeTokenizeMap $ parse <$> ["a", "b", "ab"]) "bba"
 Right [("b","b"),("b","b"),("a","a")]
-> tokenize (makeTokenizeMap $  parse <$> ["a", "b", "ab"]) "aab"
+> tokenize (makeTokenizeMap $ parse <$> ["a", "b", "ab"]) "aab"
 Left (TwoWaysTokenize 1 [("a","a"),("ab","ab")] [("a","a"),("a","a"),("b","b")])
 ```
 to solve the problem we can specify that that there should be no `b`
 character after separate `a` token
 ```hs
-> checkUniqueTokenizing $  parse <$> ["ab", "a?!b", "b"]
+> checkUniqueTokenizing $ parse <$> ["ab", "a?!b", "b"]
 Right ()
-> tokenize (makeTokenizeMap $  parse <$> ["a?!b", "b", "ab"]) "aab"
+> tokenize (makeTokenizeMap $ parse <$> ["a?!b", "b", "ab"]) "aab"
 Right [("a?!b","a"),("ab","ab")]
 ```
 
 More complex example. Problem is for string `"ababab"`:
 ```hs
-> checkUniqueTokenizing $  parse <$> ["ab", "aba", "bab"]
+> checkUniqueTokenizing $ parse <$> ["ab", "aba", "bab"]
 Left Conflicts: [("ab",ab),("ab",ab),("ab",ab)] [("aba",aba),("bab",bab)]
 ```
 
@@ -57,7 +64,7 @@ Here even `"aab"` can be split as `aa` and then `b` or `a*b`. However, current
 algorithm gives another conflict `"aaa*b"` can be spit as `aa` and `a*b` or
 simply `a*b`:
 ``` hs
-> checkUniqueTokenizing $  parse <$> ["a*b", "aa", "b"]
+> checkUniqueTokenizing $ parse <$> ["a*b", "aa", "b"]
 Left Conflicts: [("aa",aa),("a*b",ab)] [("a*b",aaab)]
 ```
 
