@@ -10,6 +10,7 @@
 -}
 module Text.Tokenizer.BlackWhiteSet (
     BlackWhiteSet (..),
+    -- ** Some simple utilities to work with BlackWhiteSet
     singleton, intersection, isEmpty, member
   ) where
 

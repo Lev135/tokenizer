@@ -108,7 +108,7 @@ non-exponential asymptotic of the input string's length.
 
 Usage
 ---
-It's very likely, that all you need is exported from `Data.Text.Tokenizer`.
+It's very likely, that all you need is exported from `Text.Tokenizer`.
 
 Bug reports and feature requests
 ---
